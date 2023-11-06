@@ -9,15 +9,22 @@ from collections import namedtuple
 
 CMYKColor = namedtuple("CMYKColor", ["c", "m", "y", "k"])
 
+rgbC, cmykC, hslC, hsvC = 0,0,0,0
 class colorPickerApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Color Picker")
-        self.root.geometry("700x700")
+        self.root.geometry("900x900")
+        
+       
 
         style = ttk.Style()
         style.configure('TButton', font=('Helvetica', 16))
         style.configure('TLabel', font=('Helvetica', 20))
+
+        self.pick_color_button = ttk.Button(
+            self.root, text="Selecione uma cor", command=self.toggle_color_picker)
+        self.pick_color_button.pack(pady=20)
 
         self.color_label = ttk.Label(
             self.root, text="Cor selecionada: ")
@@ -36,25 +43,37 @@ class colorPickerApp:
             self.root, text="Copiar valor em HEX", command=self.copy_hex_value)
         self.copy_hex_button.pack()
 
-        self.pick_color_button = ttk.Button(
-            self.root, text="Selecione uma cor", command=self.toggle_color_picker)
-        self.pick_color_button.pack(pady=20)
-
         self.color_rgb_label = ttk.Label(
         self.root, text="Valor em RGB: ")
         self.color_rgb_label.pack(pady=20)
+
+        self.copy_rgb_button = ttk.Button(
+            self.root, text="Copiar valor em RGB", command=self.copy_rgb_value)
+        self.copy_rgb_button.pack()
 
         self.color_cmyk_label = ttk.Label(
         self.root, text="Valor em CMYK: ")
         self.color_cmyk_label.pack(pady=20)
 
+        self.copy_cmyk_button = ttk.Button(
+            self.root, text="Copiar valor em CMYK", command=self.copy_cmyk_value)
+        self.copy_cmyk_button.pack()
+
         self.color_hsl_label = ttk.Label(
         self.root, text="Valor em HSL: ")
         self.color_hsl_label.pack(pady=20)
 
+        self.copy_hsl_button = ttk.Button(
+            self.root, text="Copiar valor em HSL", command=self.copy_hsl_value)
+        self.copy_hsl_button.pack()
+
         self.color_hsv_label = ttk.Label(
         self.root, text="Valor em HSV: ")
         self.color_hsv_label.pack(pady=20)
+
+        self.copy_hsv_button = ttk.Button(
+            self.root, text="Copiar valor em HSV", command=self.copy_hsv_value)
+        self.copy_hsv_button.pack()
 
 
         self.picking_color = False
@@ -76,6 +95,29 @@ class colorPickerApp:
     def copy_hex_value(self):
         if self.copied_color:
             pyperclip.copy(self.copied_color)
+
+    def copy_rgb_value(self):
+        global rgbC
+        if self.copied_color:
+            pyperclip.copy(str(rgbC))
+    
+    def copy_cmyk_value(self):
+        global cmykC 
+        cmykC = tuple(round(valor*100, 0) for valor in cmykC)
+        cmykC = tuple(int(valor) for valor in cmykC)
+        print(cmykC)
+        if self.copied_color:
+            pyperclip.copy("({}%, {}%, {}%, {}%)".format(cmykC[0], cmykC[1], cmykC[2], cmykC[3]))
+
+    def copy_hsl_value(self):
+        global hslC
+        if self.copied_color:
+            pyperclip.copy("({:.2f}, {:.2f}, {:.2f})".format(hslC[0], hslC[1], hslC[2]))
+
+    def copy_hsv_value(self):
+        global hsvC
+        if self.copied_color:
+            pyperclip.copy("({:.2f}, {:.2f}, {:.2f})".format(hsvC[0], hsvC[1], hsvC[2]))
 
     def start_listener(self):
         self.listener = mouse.Listener(on_click=self.on_click)
@@ -108,13 +150,15 @@ class colorPickerApp:
         
     def update_color(self, color_hex):
         self.color_canvas.configure(bg=color_hex)
-        self.color_hex_label.configure(text="Valor em HEX" + color_hex)
+        self.color_hex_label.configure(text="Valor em HEX: " + color_hex)
         rgb_color = self.hex_to_rgb(color_hex)
         self.color_rgb_label.configure(text="Valor em RGB: ({}, {}, {})".format(rgb_color[0], rgb_color[1], rgb_color[2]))
 
         cmyk_color = self.rgb_to_cmyk(rgb_color)
         hsl_color = self.rgb_to_hsl(rgb_color)
         hsv_color = self.rgb_to_hsv(rgb_color)
+        global rgbC, hslC, cmykC, hsvC
+        rgbC, cmykC, hslC, hsvC = rgb_color, cmyk_color, hsl_color, hsv_color
         self.color_cmyk_label.configure(text="Valor em CMYK: ({:.2f}, {:.2f}, {:.2f}, {:.2f})".format(*cmyk_color))
         self.color_hsl_label.configure(text="Valor em HSL: ({:.2f}, {:.2f}, {:.2f})".format(hsl_color[0], hsl_color[1], hsl_color[2]))
         self.color_hsv_label.configure(text="Valor em HSV: ({:.2f}, {:.2f}, {:.2f})".format(hsv_color[0], hsv_color[1], hsv_color[2]))
