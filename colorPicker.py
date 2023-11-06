@@ -3,12 +3,17 @@ from tkinter import ttk
 import pyautogui
 from pynput import mouse
 import pyperclip
+from colorsys import rgb_to_hsv, rgb_to_hls
+from collections import namedtuple
+
+
+CMYKColor = namedtuple("CMYKColor", ["c", "m", "y", "k"])
 
 class colorPickerApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Color Picker")
-        self.root.geometry("500x500")
+        self.root.geometry("700x700")
 
         style = ttk.Style()
         style.configure('TButton', font=('Helvetica', 16))
@@ -36,12 +41,20 @@ class colorPickerApp:
         self.pick_color_button.pack(pady=20)
 
         self.color_rgb_label = ttk.Label(
-        self.root, text="Valor em RGB: (0, 0, 0)")
+        self.root, text="Valor em RGB: ")
         self.color_rgb_label.pack(pady=20)
 
-        self.copy_rgb_button = ttk.Button(
-        self.root, text="Copiar valor em RGB", command=self.copy_rgb_value)
-        self.copy_rgb_button.pack()
+        self.color_cmyk_label = ttk.Label(
+        self.root, text="Valor em CMYK: ")
+        self.color_cmyk_label.pack(pady=20)
+
+        self.color_hsl_label = ttk.Label(
+        self.root, text="Valor em HSL: ")
+        self.color_hsl_label.pack(pady=20)
+
+        self.color_hsv_label = ttk.Label(
+        self.root, text="Valor em HSV: ")
+        self.color_hsv_label.pack(pady=20)
 
 
         self.picking_color = False
@@ -64,11 +77,6 @@ class colorPickerApp:
         if self.copied_color:
             pyperclip.copy(self.copied_color)
 
-    def copy_rgb_value(self):
-        if self.copied_rgb_color:
-            pyperclip.copy(self.copied_rgb_color)
-
-
     def start_listener(self):
         self.listener = mouse.Listener(on_click=self.on_click)
         self.listener.start()
@@ -83,8 +91,6 @@ class colorPickerApp:
             color = pyautogui.screenshot(region=(x, y, 1, 1)).getpixel((0, 0))
             color_hex = self.rgb_to_hex(color)
             self.copied_color = color_hex
-            rgb_color = self.hex_to_rgb(color_hex)
-            self.copied_rgb_color = "RGB: ({}, {}, {})".format(rgb_color[0], rgb_color[1], rgb_color[2])
             self.update_color(color_hex)
             self.picking_color = False
             self.pick_color_button.configure(text="Selecione uma cor")
@@ -105,6 +111,31 @@ class colorPickerApp:
         self.color_hex_label.configure(text="Valor em HEX" + color_hex)
         rgb_color = self.hex_to_rgb(color_hex)
         self.color_rgb_label.configure(text="Valor em RGB: ({}, {}, {})".format(rgb_color[0], rgb_color[1], rgb_color[2]))
+
+        cmyk_color = self.rgb_to_cmyk(rgb_color)
+        hsl_color = self.rgb_to_hsl(rgb_color)
+        hsv_color = self.rgb_to_hsv(rgb_color)
+        self.color_cmyk_label.configure(text="Valor em CMYK: ({:.2f}, {:.2f}, {:.2f}, {:.2f})".format(*cmyk_color))
+        self.color_hsl_label.configure(text="Valor em HSL: ({:.2f}, {:.2f}, {:.2f})".format(hsl_color[0], hsl_color[1], hsl_color[2]))
+        self.color_hsv_label.configure(text="Valor em HSV: ({:.2f}, {:.2f}, {:.2f})".format(hsv_color[0], hsv_color[1], hsv_color[2]))
+
+    def rgb_to_cmyk(self, rgb):
+        r, g, b = [x / 255.0 for x in rgb]
+        k = min(1 - r, 1 - g, 1 - b)
+        c = (1 - r - k) / (1 - k) if (1 - k) > 0 else 0
+        m = (1 - g - k) / (1 - k) if (1 - k) > 0 else 0
+        y = (1 - b - k) / (1 - k) if (1 - k) > 0 else 0
+        return CMYKColor(c, m, y, k)
+
+    def rgb_to_hsl(self, rgb):
+        r, g, b = [x / 255.0 for x in rgb]
+        h, l, s = rgb_to_hls(r, g, b)
+        return (h * 360, s * 100, l * 100)
+
+    def rgb_to_hsv(self, rgb):
+        r, g, b = [x / 255.0 for x in rgb]
+        h, s, v = rgb_to_hsv(r, g, b)
+        return (h * 360, s * 100, v * 100)
 
     def clear_color(self):
         self.color_canvas.configure(bg="white")
