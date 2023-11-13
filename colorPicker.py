@@ -7,9 +7,9 @@ from colorsys import rgb_to_hsv, rgb_to_hls #converter cores
 from collections import namedtuple #criar uma namedtuple
 
 
-CMYKColor = namedtuple("CMYKColor", ["c", "m", "y", "k"])
+CMYKColor = namedtuple("CMYKColor", ["c", "m", "y", "k"]) #definida para representar valores de cores no espaço de cor CMYK
 
-rgbC, cmykC, hslC, hsvC = 0,0,0,0 #definida para representar valores de cores no espaço de cor CMYK
+rgbC, cmykC, hslC, hsvC = 0,0,0,0 
 class colorPickerApp:
     def __init__(self, root):
         self.root = root
