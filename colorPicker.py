@@ -1,10 +1,10 @@
 import tkinter as tk
-from tkinter import ttk
-import pyautogui
-from pynput import mouse
-import pyperclip
-from colorsys import rgb_to_hsv, rgb_to_hls
-from collections import namedtuple
+from tkinter import ttk #temas do tkinter
+import pyautogui #capturar a cor do pixel na tela
+from pynput import mouse #ouvir eventos do mouse
+import pyperclip #copiar texto
+from colorsys import rgb_to_hsv, rgb_to_hls #converter cores
+from collections import namedtuple #criar uma namedtuple
 
 
 CMYKColor = namedtuple("CMYKColor", ["c", "m", "y", "k"])
@@ -82,7 +82,7 @@ class colorPickerApp:
         self.copied_color = None
         self.copied_rgb_color = None
 
-    def toggle_color_picker(self):
+    def toggle_color_picker(self): 
         if self.picking_color:
             self.picking_color = False
             self.picking_color_button.configure(text="Selecione uma cor")
@@ -157,29 +157,31 @@ class colorPickerApp:
         cmyk_color = self.rgb_to_cmyk(rgb_color)
         hsl_color = self.rgb_to_hsl(rgb_color)
         hsv_color = self.rgb_to_hsv(rgb_color)
+        
         global rgbC, hslC, cmykC, hsvC
         rgbC, cmykC, hslC, hsvC = rgb_color, cmyk_color, hsl_color, hsv_color
+        
         self.color_cmyk_label.configure(text="Valor em CMYK: ({:.2f}, {:.2f}, {:.2f}, {:.2f})".format(*cmyk_color))
         self.color_hsl_label.configure(text="Valor em HSL: ({:.2f}, {:.2f}, {:.2f})".format(hsl_color[0], hsl_color[1], hsl_color[2]))
         self.color_hsv_label.configure(text="Valor em HSV: ({:.2f}, {:.2f}, {:.2f})".format(hsv_color[0], hsv_color[1], hsv_color[2]))
 
     def rgb_to_cmyk(self, rgb):
-        r, g, b = [x / 255.0 for x in rgb]
-        k = min(1 - r, 1 - g, 1 - b)
-        c = (1 - r - k) / (1 - k) if (1 - k) > 0 else 0
+        r, g, b = [x / 255.0 for x in rgb] #normaliza os valores RGB
+        k = min(1 - r, 1 - g, 1 - b) #calcula o preto como o mínimo entre 1 - R, etc
+        c = (1 - r - k) / (1 - k) if (1 - k) > 0 else 0 #cálculo dos componentes
         m = (1 - g - k) / (1 - k) if (1 - k) > 0 else 0
         y = (1 - b - k) / (1 - k) if (1 - k) > 0 else 0
         return CMYKColor(c, m, y, k)
 
     def rgb_to_hsl(self, rgb):
-        r, g, b = [x / 255.0 for x in rgb]
-        h, l, s = rgb_to_hls(r, g, b)
-        return (h * 360, s * 100, l * 100)
+        r, g, b = [x / 255.0 for x in rgb] #normaliza os valores RGB
+        h, l, s = rgb_to_hls(r, g, b) #função da colorsys
+        return (h * 360, s * 100, l * 100) #obter o ângulo em graus
 
     def rgb_to_hsv(self, rgb):
-        r, g, b = [x / 255.0 for x in rgb]
-        h, s, v = rgb_to_hsv(r, g, b)
-        return (h * 360, s * 100, v * 100)
+        r, g, b = [x / 255.0 for x in rgb] #normaliza os valores RGB
+        h, s, v = rgb_to_hsv(r, g, b) #função da colorsys
+        return (h * 360, s * 100, v * 100) #obter o ângulo em graus
 
     def clear_color(self):
         self.color_canvas.configure(bg="white")
