@@ -9,14 +9,13 @@ from collections import namedtuple #criar uma namedtuple
 
 CMYKColor = namedtuple("CMYKColor", ["c", "m", "y", "k"])
 
-rgbC, cmykC, hslC, hsvC = 0,0,0,0
+rgbC, cmykC, hslC, hsvC = 0,0,0,0 #definida para representar valores de cores no espaço de cor CMYK
 class colorPickerApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Color Picker")
         self.root.geometry("900x900")
         
-       
 
         style = ttk.Style()
         style.configure('TButton', font=('Helvetica', 16))
@@ -82,7 +81,7 @@ class colorPickerApp:
         self.copied_color = None
         self.copied_rgb_color = None
 
-    def toggle_color_picker(self): 
+    def toggle_color_picker(self): #inicia o processo de seleção de cores
         if self.picking_color:
             self.picking_color = False
             self.picking_color_button.configure(text="Selecione uma cor")
@@ -119,7 +118,8 @@ class colorPickerApp:
         if self.copied_color:
             pyperclip.copy("({:.2f}, {:.2f}, {:.2f})".format(hsvC[0], hsvC[1], hsvC[2]))
 
-    def start_listener(self):
+    #iniciar e parar eventos ouvintes do mouse
+    def start_listener(self): 
         self.listener = mouse.Listener(on_click=self.on_click)
         self.listener.start()
 
@@ -128,7 +128,7 @@ class colorPickerApp:
             self.listener.stop()
             self.listener = None
 
-    def on_click(self, x, y, button, pressed):
+    def on_click(self, x, y, button, pressed): #obtem a cor do pixel na posição do clique
         if pressed:
             color = pyautogui.screenshot(region=(x, y, 1, 1)).getpixel((0, 0))
             color_hex = self.rgb_to_hex(color)
@@ -148,7 +148,7 @@ class colorPickerApp:
         b = int(hex_color[5:7], 16)
         return (r, g, b)
         
-    def update_color(self, color_hex):
+    def update_color(self, color_hex): #atualiza a interface com as informações da cor selecionada
         self.color_canvas.configure(bg=color_hex)
         self.color_hex_label.configure(text="Valor em HEX: " + color_hex)
         rgb_color = self.hex_to_rgb(color_hex)
@@ -167,23 +167,23 @@ class colorPickerApp:
 
     def rgb_to_cmyk(self, rgb):
         r, g, b = [x / 255.0 for x in rgb] #normaliza os valores RGB
-        k = min(1 - r, 1 - g, 1 - b) #calcula o preto como o mínimo entre 1 - R, etc
-        c = (1 - r - k) / (1 - k) if (1 - k) > 0 else 0 #cálculo dos componentes
-        m = (1 - g - k) / (1 - k) if (1 - k) > 0 else 0
-        y = (1 - b - k) / (1 - k) if (1 - k) > 0 else 0
+        k = min(1 - r, 1 - g, 1 - b) #calcula o preto como o mínimo entre 1 - R, etc // qtd de preto necessária
+        c = (1 - r - k) / (1 - k) if (1 - k) > 0 else 0 #cálculo dos componentes //ciano
+        m = (1 - g - k) / (1 - k) if (1 - k) > 0 else 0 #magenta
+        y = (1 - b - k) / (1 - k) if (1 - k) > 0 else 0 #amarelo
         return CMYKColor(c, m, y, k)
 
     def rgb_to_hsl(self, rgb):
         r, g, b = [x / 255.0 for x in rgb] #normaliza os valores RGB
-        h, l, s = rgb_to_hls(r, g, b) #função da colorsys
-        return (h * 360, s * 100, l * 100) #obter o ângulo em graus
+        h, l, s = rgb_to_hls(r, g, b) #função da colorsys // 
+        return (h * 360, s * 100, l * 100) #H (matiz em graus), L (luminosidade) e S (saturação).
 
     def rgb_to_hsv(self, rgb):
         r, g, b = [x / 255.0 for x in rgb] #normaliza os valores RGB
         h, s, v = rgb_to_hsv(r, g, b) #função da colorsys
-        return (h * 360, s * 100, v * 100) #obter o ângulo em graus
+        return (h * 360, s * 100, v * 100) #H (matiz em graus), S (saturação) e V (valor).
 
-    def clear_color(self):
+    def clear_color(self): #limpar a cor exibida na interface gráfica
         self.color_canvas.configure(bg="white")
         self.color_hex_label.configure(text="Valor em HEX: ")
 
